@@ -1,0 +1,71 @@
+<style>
+	.c_textarea{min-height:270px;min-width:500px;}
+	.alert{padding:12px;margin-bottom:6px;display:none;}
+	.alert-success{
+		background: #bdefbd;
+		color: #016101;
+		border: 1px solid #027502;
+	}
+	.alert-danger{
+		background: #eac2c9;
+		color: #d20b30;
+		border: 1px solid #f50447;	
+	}
+</style>
+
+<form class="pdfit_form" method="POST" action="" enctype="multipart/form-data">
+	<div class="form_box">
+		<div><label>Enter text or html and get a pdf version of the content :)</label></div>
+		<div><textarea class="c_textarea" name="pdfit_content" placeholder="Enter something awesome..." maxlength="5000" required></textarea></div>
+		<br/>
+		
+		<div>
+			<div class="alert alert-success">Pdf generated successfully <a id="pdfit_link" target="_blank"href="#">Download</a></div>
+			<div class="alert alert-danger">Some error occurred. Please try again!</div>
+		</div>
+		
+		<div><input class="save-support" name="save_support" type="submit" value="Generate PDF" style="float:right;"></div>
+		<div style="clear:both;"></div>
+	</div>
+</form>
+
+
+<script>
+	try{var pdfit_j_v = parseInt(jQuery.fn.jquery);}catch{alert('You need jQuery in order to run this plugin!');var pdfit_j_v = 0;}
+	if(pdfit_j_v){
+		jQuery(document).ready(function(){
+			jQuery('.c_textarea').on('focus', function(e){
+				jQuery('.pdfit_form').find('.alert-danger').slideUp();
+				jQuery('.pdfit_form').find('.alert-success').slideUp();	
+			});
+			jQuery('.pdfit_form').on('submit', function(e){
+				e.preventDefault();
+				jQuery('.pdfit_form').find('.alert-danger').css('display', 'none');
+				jQuery('.pdfit_form').find('.alert-success').css('display', 'none');
+				var form_data = new FormData();
+				form_data.append('action', 'post_pdfit');
+				form_data.append('pdfit_content', jQuery('textarea[name="pdfit_content"]').val());
+				jQuery.ajax({
+					url: {{ajaxurl}},
+					type: 'post',
+					contentType: false,
+					processData: false,
+					data: form_data,
+					success: function (response) {
+						response = JSON.parse(response);
+						if((response.success != undefined) && (response.success == true)){
+							jQuery('#pdfit_link').attr('href', response.url);
+							jQuery('.pdfit_form').find('.alert-success').slideDown();
+						}
+						else{
+							jQuery('.pdfit_form').find('.alert-danger').slideDown();
+						}
+					},  
+					error: function (response) {
+						jQuery('.pdfit_form').find('.alert-danger').slideDown();
+					}
+				});
+			});
+         });
+	}
+</script>
